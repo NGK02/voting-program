@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use std::collections::BTreeSet;
+use anchor_lang::solana_program::hash::hash;
 
 use crate::errors::*;
 use crate::states::*;
@@ -13,11 +14,11 @@ pub fn create_proposal(
     proposal_open_from: i64,
     proposal_finished_from: i64,
 ) -> Result<()> {
-    if title.len() > PROPOSAL_TITLE_LENGTH {
+    if title.len() > PROPOSAL_MAX_TITLE_LENGTH {
         return Err(VotingError::TitleTooLong.into());
     }
 
-    if description.len() > PROPOSAL_DESCRIPTION_LENGTH {
+    if description.len() > PROPOSAL_MAX_DESCRIPTION_LENGTH {
         return Err(VotingError::DescriptionTooLong.into());
     }
 
@@ -65,7 +66,7 @@ pub struct CreateProposal<'info> {
         init,
         payer = proposer,
         space = 8 + Proposal::INIT_SPACE,
-        seeds = [PROPOSAL_SEED.as_bytes(), title.as_bytes(), proposer.key().as_ref()],
+        seeds = [PROPOSAL_SEED.as_bytes(), {hash(title.as_bytes()).to_bytes().as_ref()}, proposer.key().as_ref()],
         bump
     )]
     pub proposal: Account<'info, Proposal>,
