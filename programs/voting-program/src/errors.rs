@@ -14,15 +14,13 @@ pub enum VotingError {
     CandidateIdTooLong,
     #[msg("Cannot create proposal, invalid proposal time")]
     InvalidProposalTime,
-    #[msg("Cannot cast vote, no votes provided")]
-    NoVotesProvided,
-    #[msg("Cannot cast vote, too many approvals provided")]
-    TooManyApprovals,
-    #[msg("Cannot cast vote, invalid approval provided")]
-    InvalidApproval,
+    #[msg("Cannot cast vote, no candidate votes specified")]
+    NotEnoughCandidateVotes,
+    #[msg("Cannot cast vote, too many candidate votes specified")]
+    TooManyCandidateVotes,
     #[msg("Cannot create proposal, duplicate candidates specified")]
     DuplicateCandidates,
-    #[msg("Cannot cast vote, invalid candidate ID")]
+    #[msg("Cannot cast vote, invalid candidate ID specified")]
     InvalidCandidateId,
     #[msg("Cannot cast vote, proposal already closed")]
     ProposalClosed,

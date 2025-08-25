@@ -306,7 +306,11 @@ describe("voting-program", () => {
 
   describe("Cast Vote", async () => {
     it("Should sucessfully cast a vote when parameters are valid", async () => { });
-
+    it("Should return an error when not enough candidate votes are specified", async () => { });
+    it("Should return an error when too many candidate votes are specified", async () => { });
+    it("Should return an error when an invalid candidate ID is specified", async () => { });
+    it("Should return an error when proposal is already closed", async () => { });
+    it("Should return an error when duplicate candidate IDs are specified", async () => { });
   })
 });
 

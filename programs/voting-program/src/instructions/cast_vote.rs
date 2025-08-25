@@ -14,11 +14,11 @@ pub fn cast_vote(ctx: Context<CastVote>, candidate_ids: Vec<String>) -> Result<(
     }
 
     if candidate_ids.is_empty() {
-        return Err(VotingError::NoVotesProvided.into());
+        return Err(VotingError::NotEnoughCandidateVotes.into());
     }
 
     if candidate_ids.len() > ctx.accounts.proposal.candidates.len() {
-        return Err(VotingError::TooManyApprovals.into());
+        return Err(VotingError::TooManyCandidateVotes.into());
     }
 
     // Validate length of each candidate ID.
