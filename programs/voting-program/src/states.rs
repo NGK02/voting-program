@@ -1,6 +1,4 @@
 use anchor_lang::prelude::*;
-use std::collections::BTreeMap;
-use std::collections::BTreeSet;
 
 pub const MIN_NUMBER_OF_CANDIDATES: usize = 2;
 pub const MAX_NUMBER_OF_CANDIDATES: usize = 12;

@@ -61,7 +61,6 @@ describe("voting-program", () => {
         {
           proposer: proposer.publicKey,
           proposal: proposalPublicKey,
-          systemProgram: anchor.web3.SystemProgram.programId
         }
       ).signers([proposer]).rpc({ commitment: "confirmed" });
 
@@ -87,7 +86,6 @@ describe("voting-program", () => {
           {
             proposer: proposer.publicKey,
             proposal: proposalPublicKey,
-            systemProgram: anchor.web3.SystemProgram.programId
           }
         ).signers([proposer]).rpc({ commitment: "confirmed" });
       } catch (error) {
@@ -117,7 +115,6 @@ describe("voting-program", () => {
           {
             proposer: proposer.publicKey,
             proposal: proposalPublicKey,
-            systemProgram: anchor.web3.SystemProgram.programId
           }
         ).signers([proposer]).rpc({ commitment: "confirmed" });
       } catch (error) {
@@ -143,7 +140,7 @@ async function airdropSol(provider: anchor.Provider, recipient: PublicKey, amoun
 }
 
 async function checkProposal(
-  program: anchor.Program,
+  program: anchor.Program<VotingProgram>,
   proposal: PublicKey,
   proposer?: PublicKey,
   title?: string,
