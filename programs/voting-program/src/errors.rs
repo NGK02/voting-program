@@ -10,6 +10,8 @@ pub enum VotingError {
     TooManyCandidates,
     #[msg("Cannot create proposal, not enough candidates specified")]
     NotEnoughCandidates,
+    #[msg("Cannot create proposal, candidate ID too long")]
+    CandidateIdTooLong,
     #[msg("Cannot create proposal, invalid proposal time")]
     InvalidProposalTime,
     #[msg("Cannot cast vote, no votes provided")]

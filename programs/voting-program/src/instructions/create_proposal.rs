@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
-use std::collections::BTreeSet;
 use anchor_lang::solana_program::hash::hash;
+use std::collections::BTreeSet;
 
 use crate::errors::*;
 use crate::states::*;
@@ -14,6 +14,8 @@ pub fn create_proposal(
     proposal_open_from: i64,
     proposal_finished_from: i64,
 ) -> Result<()> {
+    let candidate_count = candidate_ids.len();
+
     if title.len() > PROPOSAL_MAX_TITLE_LENGTH {
         return Err(VotingError::TitleTooLong.into());
     }
@@ -22,16 +24,26 @@ pub fn create_proposal(
         return Err(VotingError::DescriptionTooLong.into());
     }
 
-    if candidate_ids.len() < MIN_NUMBER_OF_CANDIDATES {
+    if candidate_count < MIN_NUMBER_OF_CANDIDATES {
         return Err(VotingError::NotEnoughCandidates.into());
-    } else if candidate_ids.len() > MAX_NUMBER_OF_CANDIDATES {
+    } else if candidate_count > MAX_NUMBER_OF_CANDIDATES {
         return Err(VotingError::TooManyCandidates.into());
     }
 
     // TODO: Validate length of candidate ids.
 
-    let unique_candidates: BTreeSet<_> = candidate_ids.iter().collect();
-    if unique_candidates.len() != candidate_ids.len() {
+    let unique_candidates: BTreeSet<_> =
+        candidate_ids
+            .iter()
+            .try_fold(BTreeSet::new(), |mut set, id| {
+                if id.len() > CANDIDATE_ID_MAX_LENGTH {
+                    return Err(VotingError::CandidateIdTooLong);
+                }
+                set.insert(id.clone());
+                Ok(set)
+            })?;
+
+    if unique_candidates.len() != candidate_count {
         return Err(VotingError::DuplicateCandidates.into());
     }
 

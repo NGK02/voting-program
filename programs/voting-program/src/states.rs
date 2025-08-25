@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 
 pub const MIN_NUMBER_OF_CANDIDATES: usize = 2;
 pub const MAX_NUMBER_OF_CANDIDATES: usize = 12;
+pub const CANDIDATE_ID_MAX_LENGTH: usize = 50;
 
 pub const PROPOSAL_MAX_TITLE_LENGTH: usize = 100;
 pub const PROPOSAL_MAX_DESCRIPTION_LENGTH: usize = 600;
