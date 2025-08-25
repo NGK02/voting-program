@@ -1,12 +1,13 @@
 use anchor_lang::prelude::*;
 use std::collections::BTreeSet;
 
-use crate::states::*;
 use crate::errors::*;
+use crate::states::*;
 
 pub fn create_proposal(
     ctx: Context<CreateProposal>,
     title: String,
+    // TODO: Make description optional.
     description: String,
     candidate_ids: Vec<String>,
     proposal_open_from: i64,
@@ -27,7 +28,7 @@ pub fn create_proposal(
     }
 
     // TODO: Validate length of candidate ids.
-    
+
     let unique_candidates: BTreeSet<_> = candidate_ids.iter().collect();
     if unique_candidates.len() != candidate_ids.len() {
         return Err(VotingError::DuplicateCandidates.into());

@@ -20,10 +20,8 @@ pub enum VotingError {
     InvalidApproval,
     #[msg("Cannot create proposal, duplicate candidates specified")]
     DuplicateCandidates,
-    #[msg("Cannot cast vote, invalid candidate ID length")]
-    InvalidCandidateIdLength,
     #[msg("Cannot cast vote, invalid candidate ID")]
     InvalidCandidateId,
     #[msg("Cannot cast vote, proposal already closed")]
-    ProposalClosed
+    ProposalClosed,
 }
