@@ -7,7 +7,8 @@ pub mod errors;
 pub mod instructions;
 pub mod states;
 
-declare_id!("E1iBq3vym5K5BuSm5v53oKKrQuQ4BTieCBJswg4PMGhi");
+// declare_id!("E1iBq3vym5K5BuSm5v53oKKrQuQ4BTieCBJswg4PMGhi");
+declare_id!("51kgRBSnzQVTbK6jdgWj6NaXQ3gcyripUSW4kvAha3kd");
 
 #[program]
 pub mod voting_program {
