@@ -20,7 +20,6 @@ pub struct Proposal {
     pub description: String,
     #[max_len(MAX_NUMBER_OF_CANDIDATES)]
     pub candidates: Vec<Candidate>,
-    pub proposal_open_from: i64,
     pub proposal_finished_from: i64,
     pub proposer: Pubkey,
     pub bump: u8,

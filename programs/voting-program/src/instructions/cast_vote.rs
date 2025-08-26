@@ -7,10 +7,9 @@ use crate::states::*;
 
 pub fn cast_vote(ctx: Context<CastVote>, candidate_ids: Vec<String>) -> Result<()> {
     let now = Clock::get().unwrap().unix_timestamp;
-    let proposal_open_from = ctx.accounts.proposal.proposal_open_from;
     let proposal_finished_from = ctx.accounts.proposal.proposal_finished_from;
 
-    if proposal_open_from > now || proposal_finished_from < now {
+    if proposal_finished_from < now {
         return Err(VotingError::ProposalClosed.into());
     }
 
@@ -39,13 +38,13 @@ pub fn cast_vote(ctx: Context<CastVote>, candidate_ids: Vec<String>) -> Result<(
 
     let candidates = &mut ctx.accounts.proposal.candidates;
 
-    candidates.iter_mut().try_for_each(|candidate| {
-        if unique_candidates.contains_key(&candidate.id) {
-            candidate.vote_count += 1;
-            Ok(())
-        } else {
-            Err(VotingError::InvalidCandidateId)
+    unique_candidates.keys().try_for_each(|id| {
+        let candidate = candidates.iter_mut().find(|candidate| candidate.id == *id);
+        if candidate.is_some() {
+            candidate.unwrap().vote_count += 1;
+            return Ok(());
         }
+        return Err(VotingError::InvalidCandidateId);
     })?;
 
     ctx.accounts.vote.candidates = unique_candidates.into_values().collect();

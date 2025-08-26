@@ -5,22 +5,38 @@ import { PublicKey } from '@solana/web3.js';
 import * as assert from "assert";
 import { BN } from "bn.js";
 import crypto from 'crypto';
+import { expect } from "chai";
 
 type Candidate = {
   id: string;
   voteCount: anchor.BN;
 };
 
-// --- Test Utilities & Constants ---
+type VoteCheckParams = {
+  voter?: PublicKey;
+  proposal?: PublicKey;
+  candidates?: Candidate[];
+  bump?: number;
+};
+
+type ProposalCheckParams = {
+  proposer?: PublicKey;
+  title?: string;
+  description?: string;
+  candidates?: Candidate[];
+  proposalOpenFrom?: anchor.BN | number;
+  proposalFinishedFrom?: anchor.BN | number;
+  bump?: number;
+};
 
 const wrongErrCodeMessage = (expected: string, found: string) =>
   `Expected ${expected} code, but found ${found}`;
 const expectedToFailErrMsg = "Expected transaction to fail, but it succeeded";
 
 const PROPOSAL_SEED = "PROPOSAL_SEED";
+const VOTE_SEED = "VOTE_SEED";
 const PROPOSAL_MAX_TITLE_LENGTH = 100;
 const PROPOSAL_MAX_DESCRIPTION_LENGTH = 600;
-const MIN_NUMBER_OF_CANDIDATES = 2;
 const MAX_NUMBER_OF_CANDIDATES = 12;
 const CANDIDATE_MAX_LENGTH = 50;
 
@@ -32,29 +48,23 @@ const notEnoughCandidatesErrCode = "NotEnoughCandidates";
 const duplicateCandidatesErrCode = "DuplicateCandidates";
 const invalidProposalTimeErrCode = "InvalidProposalTime";
 const candidateIdTooLongErrCode = "CandidateIdTooLong";
+const notEnoughCandidateVotesErrCode = "NotEnoughCandidateVotes";
+const tooManyCandidateVotesErrCode = "TooManyCandidateVotes";
+const invalidCandidateIdErrCode = "InvalidCandidateId";
+const proposalClosedErrCode = "ProposalClosed";
 
+// Reusable Test Data
+const title = "Presidential election 2025";
+const description = "Vote for your favorite candidates!";
+const candidateIds = ["John", "Barry", "Grok"];
+const now = Math.floor(new Date().getTime() / 1000);
+const proposalFinishedFrom = now + 86400;
 
 describe("voting-program", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
   const program = anchor.workspace.VotingProgram as Program<VotingProgram>;
-
-  // --- Reusable Test Data ---
-
-  const title = "Presidential election 2025";
-  const invalidTitle = "x".repeat(PROPOSAL_MAX_TITLE_LENGTH + 1);
-
-  const description = "Vote for your favorite candidates!";
-  const invalidDescription = "x".repeat(PROPOSAL_MAX_DESCRIPTION_LENGTH + 1);
-
-  const invalidCandidateId = "x".repeat(CANDIDATE_MAX_LENGTH + 1); // 51 characters
-  const invalidCandidateIds = ["John", invalidCandidateId];
-
-  const candidateIds = ["John", "Barry", "Grok"];
-  const now = Math.floor(new Date().getTime() / 1000);
-  const proposalOpenFrom = now + 60;
-  const proposalFinishedFrom = proposalOpenFrom + 86400;
 
   describe("Create Proposal", async () => {
     it("Should sucessfully create proposal when parameters are valid", async () => {
@@ -69,26 +79,26 @@ describe("voting-program", () => {
 
       await airdropSol(provider, proposer.publicKey, 1000000000);
 
-      await program.methods.createProposal(title, description, candidateIds, new BN(proposalOpenFrom), new BN(proposalFinishedFrom)).accounts(
+      const txSignature = await program.methods.createProposal(title, description, candidateIds, new BN(proposalFinishedFrom)).accounts(
         {
           proposer: proposer.publicKey,
           proposal: proposalPublicKey,
         }
       ).signers([proposer]).rpc({ commitment: "confirmed" });
+      await confirmTransaction(provider, txSignature);
 
-      // Verify the data stored on-chain
       await checkProposal(program, proposalPublicKey, {
         proposer: proposer.publicKey,
         title,
         description,
         candidates: candidateIds.map(id => ({ id, voteCount: new BN(0) })),
-        proposalOpenFrom,
         proposalFinishedFrom,
       });
     });
 
 
     it("Should throw an error when title is too long", async () => {
+      const invalidTitle = "x".repeat(PROPOSAL_MAX_TITLE_LENGTH + 1);
       const titleHash = hash(invalidTitle);
       const proposer = anchor.web3.Keypair.generate();
       const [proposalPublicKey] = PublicKey.findProgramAddressSync(
@@ -101,20 +111,24 @@ describe("voting-program", () => {
       await airdropSol(provider, proposer.publicKey, 1000000000);
 
       try {
-        await program.methods.createProposal(invalidTitle, description, candidateIds, new BN(proposalOpenFrom), new BN(proposalFinishedFrom)).accounts(
+        const txSignature = await program.methods.createProposal(invalidTitle, description, candidateIds, new BN(proposalFinishedFrom)).accounts(
           {
             proposer: proposer.publicKey,
             proposal: proposalPublicKey,
           }
         ).signers([proposer]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
         assert.fail(expectedToFailErrMsg);
       } catch (error) {
+        console.log(error);
+
         assert.strictEqual(error.error.errorCode.code, titleTooLongErrCode, wrongErrCodeMessage(titleTooLongErrCode, error.error.errorCode.code));
       }
     });
 
 
     it("Should throw an error when description is too long", async () => {
+      const invalidDescription = "x".repeat(PROPOSAL_MAX_DESCRIPTION_LENGTH + 1);
       const titleHash = hash(title);
       const proposer = anchor.web3.Keypair.generate();
       const [proposalPublicKey] = PublicKey.findProgramAddressSync(
@@ -127,14 +141,17 @@ describe("voting-program", () => {
       await airdropSol(provider, proposer.publicKey, 1000000000);
 
       try {
-        await program.methods.createProposal(title, invalidDescription, candidateIds, new BN(proposalOpenFrom), new BN(proposalFinishedFrom)).accounts(
+        const txSignature = await program.methods.createProposal(title, invalidDescription, candidateIds, new BN(proposalFinishedFrom)).accounts(
           {
             proposer: proposer.publicKey,
             proposal: proposalPublicKey,
           }
         ).signers([proposer]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
         assert.fail(expectedToFailErrMsg);
       } catch (error) {
+        console.log(error);
+
         assert.strictEqual(error.error.errorCode.code, descriptionTooLongErrCode, wrongErrCodeMessage(descriptionTooLongErrCode, error.error.errorCode.code));
       }
     });
@@ -154,14 +171,17 @@ describe("voting-program", () => {
       await airdropSol(provider, proposer.publicKey, 1000000000);
 
       try {
-        await program.methods.createProposal(title, description, tooManyCandidates, new BN(proposalOpenFrom), new BN(proposalFinishedFrom)).accounts(
+        const txSignature = await program.methods.createProposal(title, description, tooManyCandidates, new BN(proposalFinishedFrom)).accounts(
           {
             proposer: proposer.publicKey,
             proposal: proposalPublicKey,
           }
         ).signers([proposer]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
         assert.fail(expectedToFailErrMsg);
       } catch (error) {
+        console.log(error);
+
         assert.strictEqual(error.error.errorCode.code, tooManyCandidatesErrCode, wrongErrCodeMessage(tooManyCandidatesErrCode, error.error.errorCode.code));
       }
     });
@@ -181,14 +201,17 @@ describe("voting-program", () => {
       await airdropSol(provider, proposer.publicKey, 1000000000);
 
       try {
-        await program.methods.createProposal(title, description, notEnoughCandidates, new BN(proposalOpenFrom), new BN(proposalFinishedFrom)).accounts(
+        const txSignature = await program.methods.createProposal(title, description, notEnoughCandidates, new BN(proposalFinishedFrom)).accounts(
           {
             proposer: proposer.publicKey,
             proposal: proposalPublicKey,
           }
         ).signers([proposer]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
         assert.fail(expectedToFailErrMsg);
       } catch (error) {
+        console.log(error);
+
         assert.strictEqual(error.error.errorCode.code, notEnoughCandidatesErrCode, wrongErrCodeMessage(notEnoughCandidatesErrCode, error.error.errorCode.code));
       }
     });
@@ -208,22 +231,24 @@ describe("voting-program", () => {
       await airdropSol(provider, proposer.publicKey, 1000000000);
 
       try {
-        await program.methods.createProposal(title, description, duplicateCandidates, new BN(proposalOpenFrom), new BN(proposalFinishedFrom)).accounts(
+        const txSignature = await program.methods.createProposal(title, description, duplicateCandidates, new BN(proposalFinishedFrom)).accounts(
           {
             proposer: proposer.publicKey,
             proposal: proposalPublicKey,
           }
         ).signers([proposer]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
         assert.fail(expectedToFailErrMsg);
       } catch (error) {
+        console.log(error);
+
         assert.strictEqual(error.error.errorCode.code, duplicateCandidatesErrCode, wrongErrCodeMessage(duplicateCandidatesErrCode, error.error.errorCode.code));
       }
     });
 
 
-    it("Should throw an error when the proposal start time is in the past", async () => {
-      const invalidStartTime = now - 100; // 100 seconds in the past
-      const validEndTime = now + 86400;
+    it("Should throw an error when the proposal end time is in the past", async () => {
+      const invalidEndTime = now - 100; // 100 seconds in the past
       const titleHash = hash(title);
       const proposer = anchor.web3.Keypair.generate();
       const [proposalPublicKey] = PublicKey.findProgramAddressSync(
@@ -236,48 +261,25 @@ describe("voting-program", () => {
       await airdropSol(provider, proposer.publicKey, 1000000000);
 
       try {
-        await program.methods.createProposal(title, description, candidateIds, new BN(invalidStartTime), new BN(validEndTime)).accounts(
+        const txSignature = await program.methods.createProposal(title, description, candidateIds, new BN(invalidEndTime)).accounts(
           {
             proposer: proposer.publicKey,
             proposal: proposalPublicKey,
           }
         ).signers([proposer]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
         assert.fail(expectedToFailErrMsg);
       } catch (error) {
-        assert.strictEqual(error.error.errorCode.code, invalidProposalTimeErrCode, wrongErrCodeMessage(invalidProposalTimeErrCode, error.error.errorCode.code));
-      }
-    });
+        console.log(error);
 
-
-    it("Should throw an error when the proposal end time is before the start time", async () => {
-      const startTime = now + 200;
-      const invalidEndTime = now + 100; // End time is before start time
-      const titleHash = hash(title);
-      const proposer = anchor.web3.Keypair.generate();
-      const [proposalPublicKey] = PublicKey.findProgramAddressSync(
-        [
-          anchor.utils.bytes.utf8.encode(PROPOSAL_SEED),
-          titleHash,
-          proposer.publicKey.toBuffer()
-        ], program.programId);
-
-      await airdropSol(provider, proposer.publicKey, 1000000000);
-
-      try {
-        await program.methods.createProposal(title, description, candidateIds, new BN(startTime), new BN(invalidEndTime)).accounts(
-          {
-            proposer: proposer.publicKey,
-            proposal: proposalPublicKey,
-          }
-        ).signers([proposer]).rpc({ commitment: "confirmed" });
-        assert.fail(expectedToFailErrMsg);
-      } catch (error) {
         assert.strictEqual(error.error.errorCode.code, invalidProposalTimeErrCode, wrongErrCodeMessage(invalidProposalTimeErrCode, error.error.errorCode.code));
       }
     });
 
 
     it("Should throw an error when candidate ID is too long", async () => {
+      const invalidCandidateId = "x".repeat(CANDIDATE_MAX_LENGTH + 1); // 51 characters
+      const invalidCandidateIds = ["John", invalidCandidateId];
       const titleHash = hash(title);
       const proposer = anchor.web3.Keypair.generate();
       const [proposalPublicKey] = PublicKey.findProgramAddressSync(
@@ -290,69 +292,311 @@ describe("voting-program", () => {
       await airdropSol(provider, proposer.publicKey, 1000000000);
 
       try {
-        await program.methods.createProposal(title, description, invalidCandidateIds, new BN(proposalOpenFrom), new BN(proposalFinishedFrom)).accounts(
+        const txSignature = await program.methods.createProposal(title, description, invalidCandidateIds, new BN(proposalFinishedFrom)).accounts(
           {
             proposer: proposer.publicKey,
             proposal: proposalPublicKey,
           }
         ).signers([proposer]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
         assert.fail(expectedToFailErrMsg);
       } catch (error) {
+        console.log(error);
+
         assert.strictEqual(error.error.errorCode.code, candidateIdTooLongErrCode, wrongErrCodeMessage(candidateIdTooLongErrCode, error.error.errorCode.code));
       }
     });
 
   })
 
+
   describe("Cast Vote", async () => {
-    it("Should sucessfully cast a vote when parameters are valid", async () => { });
-    it("Should return an error when not enough candidate votes are specified", async () => { });
-    it("Should return an error when too many candidate votes are specified", async () => { });
-    it("Should return an error when an invalid candidate ID is specified", async () => { });
-    it("Should return an error when proposal is already closed", async () => { });
-    it("Should return an error when duplicate candidate IDs are specified", async () => { });
+    it("Should sucessfully cast a vote when parameters are valid", async () => {
+      const proposalPublicKey = await createValidProposal(program, provider);
+      const voter = anchor.web3.Keypair.generate();
+      const [votePublicKey] = PublicKey.findProgramAddressSync(
+        [
+          anchor.utils.bytes.utf8.encode(VOTE_SEED),
+          voter.publicKey.toBuffer(),
+          proposalPublicKey.toBuffer()
+        ], program.programId);
+      await airdropSol(provider, voter.publicKey, 1000000000);
+
+      const txSignature = await program.methods.castVote([candidateIds[0]]).accounts(
+        {
+          voter: voter.publicKey,
+          proposal: proposalPublicKey
+        }
+      ).signers([voter]).rpc({ commitment: "confirmed" });
+      await confirmTransaction(provider, txSignature);
+
+      checkVote(program, votePublicKey, {
+        voter: voter.publicKey,
+        proposal: proposalPublicKey,
+        candidates: [
+          {
+            id: candidateIds[0],
+            voteCount: new BN(1)
+          }
+        ]
+      });
+
+      const proposalData = await program.account.proposal.fetch(proposalPublicKey);
+      assert.strictEqual(true, proposalData.candidates.find(candidate => candidate.id === candidateIds[0]).voteCount.eq(new BN(1)));
+
+    });
+
+
+    it("Should return an error when not enough candidate votes are specified", async () => {
+      const proposalPublicKey = await createValidProposal(program, provider);
+      const voter = anchor.web3.Keypair.generate();
+      const [votePublicKey] = PublicKey.findProgramAddressSync(
+        [
+          anchor.utils.bytes.utf8.encode(VOTE_SEED),
+          voter.publicKey.toBuffer(),
+          proposalPublicKey.toBuffer()
+        ], program.programId);
+      await airdropSol(provider, voter.publicKey, 1000000000);
+
+      try {
+        const txSignature = await program.methods.castVote([]).accounts(
+          {
+            voter: voter.publicKey,
+            proposal: proposalPublicKey
+          }
+        ).signers([voter]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
+        assert.fail(expectedToFailErrMsg);
+      } catch (error) {
+        console.log(error);
+
+        assert.strictEqual(error.error.errorCode.code, notEnoughCandidateVotesErrCode, wrongErrCodeMessage(notEnoughCandidateVotesErrCode, error.error.errorCode.code));
+      }
+    });
+
+
+    it("Should return an error when too many candidate votes are specified", async () => {
+      const proposalPublicKey = await createValidProposal(program, provider);
+      const voter = anchor.web3.Keypair.generate();
+      const [votePublicKey] = PublicKey.findProgramAddressSync(
+        [
+          anchor.utils.bytes.utf8.encode(VOTE_SEED),
+          voter.publicKey.toBuffer(),
+          proposalPublicKey.toBuffer()
+        ], program.programId);
+      await airdropSol(provider, voter.publicKey, 1000000000);
+      const tooManyCandidateVotes = [...candidateIds, "ExtraCandidate"];
+
+      try {
+        const txSignature = await program.methods.castVote(tooManyCandidateVotes).accounts(
+          {
+            voter: voter.publicKey,
+            proposal: proposalPublicKey
+          }
+        ).signers([voter]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
+        assert.fail(expectedToFailErrMsg);
+      } catch (error) {
+        console.log(error);
+
+        assert.strictEqual(error.error.errorCode.code, tooManyCandidateVotesErrCode, wrongErrCodeMessage(tooManyCandidateVotesErrCode, error.error.errorCode.code));
+      }
+    });
+
+
+    it("Should return an error when an invalid candidate ID is specified", async () => {
+      const proposalPublicKey = await createValidProposal(program, provider);
+      const voter = anchor.web3.Keypair.generate();
+      const [votePublicKey] = PublicKey.findProgramAddressSync(
+        [
+          anchor.utils.bytes.utf8.encode(VOTE_SEED),
+          voter.publicKey.toBuffer(),
+          proposalPublicKey.toBuffer()
+        ], program.programId);
+      await airdropSol(provider, voter.publicKey, 1000000000);
+
+      const invalidCandidateVotes = ["NonExistentCandidate"];
+
+      try {
+        const txSignature = await program.methods.castVote(invalidCandidateVotes).accounts(
+          {
+            voter: voter.publicKey,
+            proposal: proposalPublicKey
+          }
+        ).signers([voter]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
+        assert.fail(expectedToFailErrMsg);
+      } catch (error) {
+        console.log(error);
+
+        assert.strictEqual(error.error.errorCode.code, invalidCandidateIdErrCode, wrongErrCodeMessage(invalidCandidateIdErrCode, error.error.errorCode.code));
+      }
+    });
+
+
+    it("Should return an error when proposal is already closed", async () => {
+      const endTime = Math.floor(new Date().getTime() / 1000);
+
+      const titleHash = hash(title);
+      const proposer = anchor.web3.Keypair.generate();
+      const [proposalPublicKey] = PublicKey.findProgramAddressSync(
+        [
+          anchor.utils.bytes.utf8.encode(PROPOSAL_SEED),
+          titleHash,
+          proposer.publicKey.toBuffer()
+        ], program.programId);
+
+      await airdropSol(provider, proposer.publicKey, 1000000000);
+
+      const txSignature = await program.methods.createProposal(title, description, candidateIds, new BN(endTime)).accounts(
+        {
+          proposer: proposer.publicKey,
+          proposal: proposalPublicKey,
+        }
+      ).signers([proposer]).rpc({ commitment: "confirmed" });
+      await confirmTransaction(provider, txSignature);
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const proposalData = await program.account.proposal.fetch(proposalPublicKey);
+      assert.strictEqual(
+        true,
+        proposalData.proposalFinishedFrom.lt(new BN(Math.floor(new Date().getTime() / 1000))),
+        "Proposal should be closed, but it's not.");
+
+      const voter = anchor.web3.Keypair.generate();
+      const [votePublicKey] = PublicKey.findProgramAddressSync(
+        [
+          anchor.utils.bytes.utf8.encode(VOTE_SEED),
+          voter.publicKey.toBuffer(),
+          proposalPublicKey.toBuffer()
+        ], program.programId);
+      await airdropSol(provider, voter.publicKey, 1000000000);
+
+      try {
+        const txSignature = await program.methods.castVote([candidateIds[0]]).accounts(
+          {
+            voter: voter.publicKey,
+            proposal: proposalPublicKey
+          }
+        ).signers([voter]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
+        assert.fail(expectedToFailErrMsg);
+      } catch (error) {
+        console.log(error);
+
+        assert.strictEqual(error.error.errorCode.code, proposalClosedErrCode, wrongErrCodeMessage(proposalClosedErrCode, error.error.errorCode.code));
+      }
+    });
+
+
+    it("Should return an error when duplicate candidate IDs are specified", async () => {
+      const proposalPublicKey = await createValidProposal(program, provider);
+      const voter = anchor.web3.Keypair.generate();
+      const [votePublicKey] = PublicKey.findProgramAddressSync(
+        [
+          anchor.utils.bytes.utf8.encode(VOTE_SEED),
+          voter.publicKey.toBuffer(),
+          proposalPublicKey.toBuffer()
+        ], program.programId);
+      await airdropSol(provider, voter.publicKey, 1000000000);
+
+      const duplicateVotes = [candidateIds[0], candidateIds[1], candidateIds[0]]; // John, Barry, John
+
+      try {
+        const txSignature = await program.methods.castVote(duplicateVotes).accounts(
+          {
+            voter: voter.publicKey,
+            proposal: proposalPublicKey
+          }
+        ).signers([voter]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
+        assert.fail(expectedToFailErrMsg);
+      } catch (error) {
+        console.log(error);
+        assert.strictEqual(error.error.errorCode.code, duplicateCandidatesErrCode, wrongErrCodeMessage(duplicateCandidatesErrCode, error.error.errorCode.code));
+      }
+    });
+
+    it("Should return an error when a voter attempts to vote a second time", async () => {
+      const proposalPublicKey = await createValidProposal(program, provider);
+      const voter = anchor.web3.Keypair.generate();
+      const [votePublicKey] = PublicKey.findProgramAddressSync(
+        [
+          anchor.utils.bytes.utf8.encode(VOTE_SEED),
+          voter.publicKey.toBuffer(),
+          proposalPublicKey.toBuffer()
+        ], program.programId);
+      await airdropSol(provider, voter.publicKey, 1000000000);
+
+      const txSignature = await program.methods.castVote([candidateIds[0]]).accounts(
+        {
+          voter: voter.publicKey,
+          proposal: proposalPublicKey
+        }
+      ).signers([voter]).rpc({ commitment: "confirmed" });
+      await confirmTransaction(provider, txSignature);
+
+      try {
+        const txSignature = await program.methods.castVote([candidateIds[0]]).accounts(
+          {
+            voter: voter.publicKey,
+            proposal: proposalPublicKey
+          }
+        ).signers([voter]).rpc({ commitment: "confirmed" });
+        await confirmTransaction(provider, txSignature);
+        assert.fail(expectedToFailErrMsg);
+      } catch (error) {
+        console.log(error);
+        expect(error.message).to.include("custom program error: 0x0");
+      }
+    });
   })
 });
 
-
 // --- Helper Functions ---
 
-/**
- * Airdrops SOL to a specified recipient publicKey.
- */
+async function createValidProposal(program: anchor.Program<VotingProgram>, provider: anchor.Provider): Promise<PublicKey> {
+  const titleHash = hash(title);
+  const proposer = anchor.web3.Keypair.generate();
+  const [proposalPublicKey] = PublicKey.findProgramAddressSync(
+    [
+      anchor.utils.bytes.utf8.encode(PROPOSAL_SEED),
+      titleHash,
+      proposer.publicKey.toBuffer()
+    ], program.programId);
+
+  await airdropSol(provider, proposer.publicKey, 1000000000);
+
+  const txSignature = await program.methods.createProposal(title, description, candidateIds, new BN(proposalFinishedFrom)).accounts(
+    {
+      proposer: proposer.publicKey,
+      proposal: proposalPublicKey,
+    }
+  ).signers([proposer]).rpc({ commitment: "confirmed" });
+  await confirmTransaction(provider, txSignature);
+
+  return proposalPublicKey;
+}
+
+async function confirmTransaction(provider: anchor.Provider, txSignature: string) {
+  const latestBlockHash = await provider.connection.getLatestBlockhash();
+  await provider.connection.confirmTransaction({
+    signature: txSignature,
+    blockhash: latestBlockHash.blockhash,
+    lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+  }, "confirmed");
+}
+
 async function airdropSol(provider: anchor.Provider, recipient: PublicKey, amount: number) {
   const connection = provider.connection;
   const signature = await connection.requestAirdrop(recipient, amount);
-  const latestBlockHash = await connection.getLatestBlockhash();
-
-  await connection.confirmTransaction({
-    signature,
-    blockhash: latestBlockHash.blockhash,
-    lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
-  });
+  await confirmTransaction(provider, signature);
 }
 
-/**
- * Creates a SHA256 hash buffer from a string, matching the Rust `hash` function.
- */
 function hash(data: string): Buffer {
   return crypto.createHash('sha256').update(data, 'utf-8').digest();
 }
 
-
-type ProposalCheckParams = {
-  proposer?: PublicKey;
-  title?: string;
-  description?: string;
-  candidates?: Candidate[];
-  proposalOpenFrom?: anchor.BN | number;
-  proposalFinishedFrom?: anchor.BN | number;
-  bump?: number;
-};
-
-/**
- * Fetches a proposal account and asserts its fields match the expected values.
- */
 async function checkProposal(
   program: anchor.Program<VotingProgram>,
   proposal: PublicKey,
@@ -388,12 +632,6 @@ async function checkProposal(
       );
     }
   }
-  if (expected.proposalOpenFrom !== undefined) {
-    const val = expected.proposalOpenFrom instanceof BN ? expected.proposalOpenFrom : new BN(expected.proposalOpenFrom);
-    assert.ok(proposalData.proposalOpenFrom.eq(val),
-      `proposalOpenFrom should be ${val.toString()} but was ${proposalData.proposalOpenFrom.toString()}`
-    );
-  }
   if (expected.proposalFinishedFrom !== undefined) {
     const val = expected.proposalFinishedFrom instanceof BN ? expected.proposalFinishedFrom : new BN(expected.proposalFinishedFrom);
     assert.ok(proposalData.proposalFinishedFrom.eq(val),
@@ -403,6 +641,43 @@ async function checkProposal(
   if (expected.bump !== undefined) {
     assert.strictEqual(proposalData.bump, expected.bump,
       `Bump should be ${expected.bump} but was ${proposalData.bump}`
+    );
+  }
+}
+
+async function checkVote(
+  program: anchor.Program<VotingProgram>,
+  vote: PublicKey,
+  expected: VoteCheckParams
+) {
+  const voteData = await program.account.vote.fetch(vote);
+
+  if (expected.voter) {
+    assert.ok(voteData.voter.equals(expected.voter),
+      `Voter should be ${expected.voter.toBase58()} but was ${voteData.voter.toBase58()}`
+    );
+  }
+  if (expected.proposal) {
+    assert.ok(voteData.proposal.equals(expected.proposal),
+      `Proposal should be ${expected.proposal.toBase58()} but was ${voteData.proposal.toBase58()}`
+    );
+  }
+  if (expected.candidates) {
+    assert.strictEqual(voteData.candidates.length, expected.candidates.length,
+      `Vote candidates length should be ${expected.candidates.length} but was ${voteData.candidates.length}`
+    );
+    for (let i = 0; i < expected.candidates.length; i++) {
+      assert.strictEqual(voteData.candidates[i].id, expected.candidates[i].id,
+        `Vote candidate ${i} id should be "${expected.candidates[i].id}" but was "${voteData.candidates[i].id}"`
+      );
+      assert.ok(voteData.candidates[i].voteCount.eq(new BN(expected.candidates[i].voteCount)),
+        `Vote candidate ${i} voteCount should be ${expected.candidates[i].voteCount} but was ${voteData.candidates[i].voteCount.toString()}`
+      );
+    }
+  }
+  if (expected.bump !== undefined) {
+    assert.strictEqual(voteData.bump, expected.bump,
+      `Vote bump should be ${expected.bump} but was ${voteData.bump}`
     );
   }
 }

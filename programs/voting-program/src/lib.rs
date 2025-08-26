@@ -19,7 +19,6 @@ pub mod voting_program {
         // TODO: Make description optional.
         description: String,
         candidate_ids: Vec<String>,
-        proposal_open_from: i64,
         proposal_finished_from: i64,
     ) -> Result<()> {
         instructions::create_proposal::create_proposal(
@@ -27,7 +26,6 @@ pub mod voting_program {
             title,
             description,
             candidate_ids,
-            proposal_open_from,
             proposal_finished_from,
         )
     }

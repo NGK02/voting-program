@@ -11,7 +11,6 @@ pub fn create_proposal(
     // TODO: Make description optional.
     description: String,
     candidate_ids: Vec<String>,
-    proposal_open_from: i64,
     proposal_finished_from: i64,
 ) -> Result<()> {
     let candidate_count = candidate_ids.len();
@@ -48,9 +47,7 @@ pub fn create_proposal(
     }
 
     let now = Clock::get().unwrap().unix_timestamp;
-    if proposal_open_from >= proposal_finished_from
-        || proposal_open_from < now
-        || proposal_finished_from < now
+    if proposal_finished_from < now
     {
         return Err(VotingError::InvalidProposalTime.into());
     }
@@ -61,7 +58,6 @@ pub fn create_proposal(
         .into_iter()
         .map(|id| Candidate { id, vote_count: 0 })
         .collect();
-    ctx.accounts.proposal.proposal_open_from = proposal_open_from;
     ctx.accounts.proposal.proposal_finished_from = proposal_finished_from;
     ctx.accounts.proposal.proposer = ctx.accounts.proposer.key();
     ctx.accounts.proposal.bump = ctx.bumps.proposal;
