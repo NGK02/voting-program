@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use std::collections::BTreeMap;
+use anchor_lang::solana_program::hash::hash;
 
 use crate::errors::*;
 use crate::states::*;
@@ -68,7 +69,7 @@ pub struct CastVote<'info> {
     pub vote: Account<'info, Vote>,
     #[account(
         mut,
-        seeds = [PROPOSAL_SEED.as_bytes(), proposal.title.as_bytes(), proposal.proposer.key().as_ref()],
+        seeds = [PROPOSAL_SEED.as_bytes(), {hash(proposal.title.as_bytes()).to_bytes().as_ref()}, proposal.proposer.key().as_ref()],
         bump = proposal.bump
     )]
     pub proposal: Account<'info, Proposal>,
