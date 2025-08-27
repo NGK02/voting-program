@@ -1,5 +1,6 @@
-import { DashboardFeature } from '@/components/dashboard/dashboard-feature'
+'use client'
+import VotingProgramFeature from '@/components/voting-program/voting-program-feature'
 
 export default function Home() {
-  return <DashboardFeature />
+  return <VotingProgramFeature />
 }

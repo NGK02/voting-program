@@ -9,7 +9,7 @@ skip-lint = false
 voting_program = "51kgRBSnzQVTbK6jdgWj6NaXQ3gcyripUSW4kvAha3kd"
 
 [programs.localnet]
-voting_program = "E1iBq3vym5K5BuSm5v53oKKrQuQ4BTieCBJswg4PMGhi"
+voting_program = "51kgRBSnzQVTbK6jdgWj6NaXQ3gcyripUSW4kvAha3kd"
 
 [registry]
 url = "https://api.apr.dev"
@@ -22,4 +22,4 @@ wallet = "~/.config/solana/id.json"
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 
 [test]
-startup_wait = 10000
+startup_wait = 20000

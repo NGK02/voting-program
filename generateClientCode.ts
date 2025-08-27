@@ -6,4 +6,4 @@ import anchorIdl from './target/idl/voting_program.json';
 const rootNode = rootNodeFromAnchor(anchorIdl);
 const codama = createFromRoot(rootNode);
 console.log(codama.getRoot());
-codama.accept(renderVisitor('clients/js/src/generated'));
+codama.accept(renderVisitor('frontend/src/lib/solana/generated'));
