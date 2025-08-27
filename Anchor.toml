@@ -3,6 +3,7 @@
 [features]
 resolution = true
 skip-lint = false
+# seeds = true
 
 [programs.devnet]
 voting_program = "51kgRBSnzQVTbK6jdgWj6NaXQ3gcyripUSW4kvAha3kd"
