@@ -6,7 +6,7 @@ import { Label } from '@radix-ui/react-label'
 import { Input } from '../ui/input'
 import { deriveProposalPda, deriveVotePda } from '../../lib/pda';
 import { processTransaction, getProposalAccounts } from './voting-program-data-access'
-import { Address } from 'gill';
+import { Address, getAddressEncoder } from 'gill';
 import { Button } from '../ui/button'
 import { getCreateProposalInstruction, getCastVoteInstruction } from '../../lib/solana/generated/instructions'
 import { VOTING_PROGRAM_PROGRAM_ADDRESS } from '../../lib/solana/generated/programs/votingProgram'
@@ -125,14 +125,12 @@ export function CastVote({ proposal, onRefresh }: {
     proposal: { address: Address, data: Proposal },
     onRefresh: () => void
 }) {
+    const isVotingActive = new Date(Number(proposal.data.proposalFinishedFrom) * 1000) > new Date()
     const signer = useWalletUiSigner()
     const { client, account } = useWalletUi()
     const [formData, setFormData] = useState({
         chosenCandidateIds: [] as string[],
     })
-
-    // Check if voting is still active
-    const isVotingActive = new Date(Number(proposal.data.proposalFinishedFrom) * 1000) > new Date()
 
     const handleCandidateToggle = (candidateId: string) => {
         setFormData(prev => {
@@ -145,13 +143,21 @@ export function CastVote({ proposal, onRefresh }: {
     }
 
     const handleSubmit = async () => {
-        // TODO: Validation for wheter the signer has already voted before sending the transaction.
         if (!account?.address || !signer || formData.chosenCandidateIds.length === 0) return;
 
         console.log("Account address:", account.address);
         console.log("Signer address:", signer.address);
 
         const votePda = await deriveVotePda(account.address as Address<string>, proposal.address);
+        const voteAccount = await client.rpc.getAccountInfo(votePda, {
+            "commitment": "confirmed",
+            "encoding": "base64"
+        }).send();
+        if (voteAccount.value !== null) {
+            // TODO: Replace alert with a nicer UI message.
+            alert("You have already voted on this proposal.");
+            return;
+        }
 
         console.log("Instruction inputs:");
         console.log("- Candidate IDs:", formData.chosenCandidateIds);
@@ -182,7 +188,7 @@ export function CastVote({ proposal, onRefresh }: {
     }
 
     // Don't render modal if wallet not connected or voting ended
-    if (!signer || !isVotingActive) {
+    if (!account?.address || !signer || !isVotingActive) {
         return (
             <Button
                 variant="outline"
@@ -190,7 +196,7 @@ export function CastVote({ proposal, onRefresh }: {
                 className="w-full bg-neutral-100 dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 text-neutral-500 dark:text-neutral-400"
                 disabled
             >
-                {!signer ? 'Connect Wallet to Vote' : 'Voting Ended'}
+                {!isVotingActive ? 'Voting Ended' : 'Connect Wallet to Vote'}
             </Button>
         )
     }
