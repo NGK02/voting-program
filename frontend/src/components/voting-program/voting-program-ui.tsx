@@ -5,21 +5,21 @@ import { AppModal } from '../app-modal'
 import { Label } from '@radix-ui/react-label'
 import { Input } from '../ui/input'
 import { getCreateProposalInstruction } from '../../lib/solana/generated/instructions/createProposal'
+import { VOTING_PROGRAM_PROGRAM_ADDRESS } from '../../lib/solana/generated/programs/votingProgram'
+import { Proposal } from '../../lib/solana/generated/accounts/proposal'
 import { deriveProposalPda } from '../../lib/pda';
-import { processTransaction } from './voting-program-data-access'
+import { processTransaction, getProposalAccounts } from './voting-program-data-access'
 import { Address } from 'gill';
+import { Button } from '../ui/button'
 
 export function VotingProgram() {
     return (
         <div className="voting-program">
-            <div>
-                <h2>Voting Program</h2>
+            <div className="flex flex-col items-center">
                 <CreateProposal />
             </div>
-
             <br />
-
-            {/* <ProposalList /> */}
+            <ProposalList />
         </div>
     )
 }
@@ -127,5 +127,48 @@ export function CreateProposal() {
                 </div>
             </div>
         </AppModal>
+    )
+}
+
+function ProposalList() {
+    const client = useWalletUi().client
+    const programId = VOTING_PROGRAM_PROGRAM_ADDRESS;
+    const [proposals, setProposals] = useState<Array<{ address: Address, data: Proposal }>>([])
+
+    const refresh = async () => {
+        const proposalAccounts = await getProposalAccounts(client, programId)
+        setProposals(proposalAccounts)
+    }
+
+    return (
+        <div className="proposals-section">
+            <div>
+                <h3>Proposals</h3>
+                <Button
+                    onClick={refresh}
+                    variant="outline"
+                    size="sm"
+                >
+                    Refresh
+                </Button>
+            </div>
+            <div>
+                {proposals.map((
+                    proposal, index
+                ) => (
+                    <div key={index}>
+                        <h4>{proposal.data.title}</h4>
+                        <p>{proposal.data.description}</p>
+                        <div>
+                            <span>Candidates: {proposal.data.candidates.join(', ')}</span><br />
+                            <span>Proposal finished date: {new Date(Number(proposal.data.proposalFinishedFrom) * 1000).toLocaleString()}</span><br />
+                        </div>
+                        <div>
+                            {/* <CastVote eventAddress={proposal.address} /> */}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
     )
 }

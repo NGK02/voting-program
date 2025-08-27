@@ -20,7 +20,7 @@ export default function VotingProgramFeature() {
 
     return (
         <div>
-            <AppHero title="Voting Program" subtitle={'Run the program by clicking the "Run program" button.'}>
+            <AppHero title="Voting Program">
             </AppHero>
             <VotingProgram />
         </div>

@@ -1,4 +1,5 @@
-import { createSolanaClient, createTransaction, Instruction, signAndSendTransactionMessageWithSigners, SolanaClient, TransactionSigner } from 'gill'
+import { Address, createSolanaClient, createTransaction, Instruction, signAndSendTransactionMessageWithSigners, SolanaClient, TransactionSigner } from 'gill'
+import { getProposalDiscriminatorBytes, getProposalDecoder } from '../../lib/solana/generated/accounts/proposal'
 
 export async function processTransaction(
     signer: TransactionSigner,
@@ -26,4 +27,24 @@ export async function processTransaction(
 
     const signature = await signAndSendTransactionMessageWithSigners(transaction);
     return signature;
+}
+
+export async function getProposalAccounts(client: SolanaClient, programId: Address) {
+    const allAccounts = await client.rpc.getProgramAccounts(programId, {
+        encoding: 'base64'
+    }).send()
+
+    const filteredAccounts = allAccounts.filter((account) => {
+        const data = Buffer.from(account.account.data[0], 'base64')
+        const discriminator = data.subarray(0, 8)
+        return discriminator.equals(Buffer.from(getProposalDiscriminatorBytes()))
+    })
+
+    const decoder = getProposalDecoder()
+    const decodedAccounts = filteredAccounts.map((account) => ({
+        address: account.pubkey,
+        data: decoder.decode(Buffer.from(account.account.data[0], "base64"))
+    }))
+
+    return decodedAccounts
 }
