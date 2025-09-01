@@ -15,11 +15,8 @@ import { Candidate } from '../../lib/solana/generated/types/candidate'
 
 export function VotingProgram() {
     return (
-        <div className="min-h-screen bg-neutral-0 dark:bg-neutral-1000 py-8">
+        <div className="min-h-auto bg-neutral-0 dark:bg-neutral-1000 py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col items-center mb-8">
-                    <CreateProposal />
-                </div>
                 <ProposalList />
             </div>
         </div>
@@ -40,6 +37,18 @@ export function CreateProposal() {
         proposalFinishedFrom: defaultDateTime,
     })
 
+    const [candidateInput, setCandidateInput] = useState('')
+
+    const addCandidate = () => {
+        const v = candidateInput.trim()
+        if (!v) return
+        setFormData(prev => ({
+            ...prev,
+            candidateIds: [...prev.candidateIds, v],
+        }))
+        setCandidateInput('')
+    }
+
     const handleSubmit = async () => {
         // TODO: Validations for all the fields to prevent failing transactions.
         if (!account?.address || !signer) return;
@@ -50,8 +59,8 @@ export function CreateProposal() {
             Math.floor(new Date(formData.proposalFinishedFrom).getTime() / 1000)
         );
         console.log("Instruction inputs:");
-        console.log("- Title:", `"${formData.title}"`);
-        console.log("- Description:", `"${formData.description}"`);
+        console.log("- Title:", formData.title);
+        console.log("- Description:", formData.description);
         console.log("- Candidate IDs:", formData.candidateIds);
         console.log("- Proposal Finished From:", proposalFinishedFrom);
         const ix = getCreateProposalInstruction({
@@ -80,12 +89,14 @@ export function CreateProposal() {
         <AppModal
             title="Create Proposal"
             submit={handleSubmit}
+            triggerClassName="bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+            submitClassName="w-full bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700"
         >
             <div className="space-y-4">
                 <div>
                     <Label htmlFor="title">Proposal title</Label>
                     <Input
-                        id='title'
+                        id="title"
                         value={formData.title}
                         onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                     />
@@ -93,24 +104,41 @@ export function CreateProposal() {
                 <div>
                     <Label htmlFor="description">Proposal description</Label>
                     <Input
-                        id='description'
+                        id="description"
                         value={formData.description}
                         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     />
                 </div>
                 <div>
                     <Label htmlFor="candidateIds">Candidate IDs</Label>
-                    <Input
-                        id='candidateIds'
-                        type="text"
-                        value={formData.candidateIds.join(', ')}
-                        onChange={(e) => setFormData(prev => ({ ...prev, candidateIds: e.target.value.split(',').map(id => id.trim()) }))}
-                    />
+                    <div className="flex space-x-2">
+                        <Input
+                            id="candidateIds"
+                            type="text"
+                            value={candidateInput}
+                            onChange={(e) => setCandidateInput(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') addCandidate() }}
+                        />
+                        <Button className="bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                            variant="outline"
+                            size="default"
+                            onClick={addCandidate}>
+                            +
+                        </Button>
+                    </div>
+                    <div className='flex flex-row flex-wrap mt-2'>
+                        {formData.candidateIds.map((candidateId) => (
+                            <div key={candidateId} className="mr-2 mb-2 p-1 rounded-md bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600">
+                                <span>{candidateId}</span>
+                            </div>
+                        ))}
+                    </div>
+
                 </div>
                 <div>
                     <Label htmlFor="proposalFinishedFrom">Finish date</Label>
                     <Input
-                        id='proposalFinishedFrom'
+                        id="proposalFinishedFrom"
                         type="datetime-local"
                         value={formData.proposalFinishedFrom}
                         onChange={(e) => setFormData(prev => ({ ...prev, proposalFinishedFrom: e.target.value }))}
@@ -292,14 +320,18 @@ function ProposalList() {
                 <h3 className="text-2xl font-bold text-neutral-900 dark:text-white">
                     Proposals
                 </h3>
-                <Button
-                    onClick={refresh}
-                    variant="outline"
-                    size="sm"
-                    className="bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-0 dark:hover:bg-neutral-700"
-                >
-                    Refresh
-                </Button>
+
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={refresh}
+                        variant="outline"
+                        size="default"
+                        className="bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-0 dark:hover:bg-neutral-700"
+                    >
+                        Refresh
+                    </Button>
+                    <CreateProposal />
+                </div>
             </div>
 
             {/* Proposals Grid */}
@@ -319,15 +351,15 @@ function ProposalList() {
                         return (
                             <div
                                 key={index}
-                                className="bg-white dark:bg-neutral-800 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700 hover:shadow-lg transition-shadow duration-200 flex flex-col h-[600px]"
+                                className="bg-white dark:bg-neutral-800 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700 hover:shadow-lg transition-shadow duration-200 flex flex-col h-146"
                             >
                                 {/* Proposal Header - Fixed height */}
-                                <div className="p-6 pb-4 flex-shrink-0">
+                                <div className="p-6 pb-4 flex-shrink-0 h-40">
                                     <h4 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">
                                         {proposal.data.title}
                                     </h4>
 
-                                    <p className="text-neutral-600 dark:text-neutral-300 mb-4 line-clamp-3">
+                                    <p className="text-neutral-600 dark:text-neutral-300 mb-4 line-clamp-3 overflow-y-auto">
                                         {proposal.data.description}
                                     </p>
                                 </div>
@@ -345,7 +377,7 @@ function ProposalList() {
                                     ) : (
                                         <div className="space-y-2 overflow-y-auto flex-1 pr-2">
                                             {sortedCandidates.map((candidate, candidateIndex) => {
-                                                const isWinner = candidateIndex === 0 && hasVotes;
+                                                const isWinner = candidateIndex === 0 && hasVotes && sortedCandidates[1]?.voteCount < candidate.voteCount;
                                                 const rank = candidateIndex + 1;
 
                                                 return (
@@ -414,15 +446,20 @@ function ProposalList() {
 
                                     {/* Status Badge */}
                                     <div className="mb-4">
-                                        {isProposalActive ? (
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                                Active
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                                                Ended
-                                            </span>
-                                        )}
+                                        <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                                            Status:
+                                        </span>
+                                        <div>
+                                            {isProposalActive ? (
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                    Active
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                                    Ended
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Action Button */}

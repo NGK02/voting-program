@@ -23,7 +23,7 @@ export function AppModal({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className={triggerClassName}>{title}</Button>
+        <Button variant="outline" size="default" className={triggerClassName}>{title}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
@@ -32,7 +32,7 @@ export function AppModal({
         <div className="grid gap-4 py-4">{children}</div>
         <DialogFooter>
           {submit ? (
-            <Button variant="outline" type="submit" onClick={submit} disabled={submitDisabled} className={submitClassName}>
+            <Button variant="outline" size="default" type="submit" onClick={submit} disabled={submitDisabled} className={submitClassName}>
               {submitLabel || 'Save'}
             </Button>
           ) : null}
