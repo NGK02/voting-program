@@ -20,7 +20,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
       <div className="mx-auto flex justify-between items-center">
         <div className="flex items-baseline gap-4">
           <Link className="text-xl hover:text-neutral-500 dark:hover:text-white" href="/">
-            <span>Frontend</span>
+            <span>Voting DApp</span>
           </Link>
           <div className="hidden md:flex items-center">
             <ul className="flex gap-4 flex-nowrap items-center">
@@ -44,7 +44,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
 
         <div className="hidden md:flex items-center gap-4">
           <WalletButton size="sm" />
-          <ClusterButton size="sm" />
+          {/* <ClusterButton size="sm" /> */}
           <ThemeSelect />
         </div>
 
@@ -66,7 +66,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
               </ul>
               <div className="flex flex-col gap-4">
                 <WalletButton />
-                <ClusterButton />
+                {/* <ClusterButton /> */}
                 <ThemeSelect />
               </div>
             </div>

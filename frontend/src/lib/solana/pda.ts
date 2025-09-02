@@ -1,5 +1,5 @@
 import { Address, getProgramDerivedAddress, getAddressEncoder } from 'gill';
-import { VOTING_PROGRAM_PROGRAM_ADDRESS } from './solana/generated';
+import { VOTING_PROGRAM_PROGRAM_ADDRESS } from './generated';
 import crypto from 'crypto';
 
 export async function deriveProposalPda(proposer: Address, title: string): Promise<Address> {
