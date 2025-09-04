@@ -7,6 +7,7 @@ import { createSolanaDevnet, createSolanaLocalnet, createWalletUiConfig, WalletU
 export const WalletButton = dynamic(async () => (await import('@wallet-ui/react')).WalletUiDropdown, {
   ssr: false,
 })
+
 export const ClusterButton = dynamic(async () => (await import('@wallet-ui/react')).WalletUiClusterDropdown, {
   ssr: false,
 })

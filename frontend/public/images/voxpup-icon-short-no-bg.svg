@@ -1,87 +1,5 @@
-'use client'
-import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Menu, X } from 'lucide-react'
-import { ThemeSelect } from '@/components/theme-select'
-import { WalletButton } from '@/components/solana/solana-provider'
-
-export function AppHeader({ links = [] }: { links: { label: string; path: string }[] }) {
-  const pathname = usePathname()
-  const [showMenu, setShowMenu] = useState(false)
-
-  function isActive(path: string) {
-    return path === '/' ? pathname === '/' : pathname.startsWith(path)
-  }
-
-  return (
-    <header className="relative z-50 px-4 py-2 bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-400">
-      <div className="mx-auto flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Logo></Logo>
-          <Link className="text-xl text-neutral-900 dark:text-neutral-100 hover:text-neutral-500 dark:hover:text-white" href="/">
-            <span>VoxPup</span>
-          </Link>
-          <div className="hidden md:flex items-center">
-            <ul className="flex gap-4 flex-nowrap items-center">
-              {links.map(({ label, path }) => (
-                <li key={path}>
-                  <Link
-                    className={`hover:text-neutral-500 dark:hover:text-white ${isActive(path) ? 'text-neutral-500 dark:text-white' : ''}`}
-                    href={path}
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setShowMenu(!showMenu)}>
-          {showMenu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </Button>
-
-        <div className="hidden md:flex items-center gap-4">
-          <WalletButton size="sm"/>
-          {/* <ClusterButton size="sm" /> */}
-          <ThemeSelect />
-        </div>
-
-        {showMenu && (
-          <div className="md:hidden fixed inset-x-0 top-[52px] bottom-0 bg-neutral-100/95 dark:bg-neutral-900/95 backdrop-blur-sm">
-            <div className="flex flex-col p-4 gap-4 border-t dark:border-neutral-800">
-              <ul className="flex flex-col gap-4">
-                {links.map(({ label, path }) => (
-                  <li key={path}>
-                    <Link
-                      className={`hover:text-neutral-500 dark:hover:text-white block text-lg py-2  ${isActive(path) ? 'text-neutral-500 dark:text-white' : ''} `}
-                      href={path}
-                      onClick={() => setShowMenu(false)}
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex flex-col gap-4">
-                <WalletButton />
-                {/* <ClusterButton /> */}
-                <ThemeSelect />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </header>
-  )
-}
-
-export function Logo() {
-  return (
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100%" viewBox="0 0 464 432" enableBackground="new 0 0 464 432" fill="currentColor" className="w-14 h-auto text-neutral-900 dark:text-neutral-100">
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100%" viewBox="0 0 464 432" enable-background="new 0 0 464 432" xml:space="preserve">
+<path fill="#000000" opacity="1.000000" stroke="none" d="
 M383.070587,234.954773 
 	C378.260986,230.524506 375.310974,225.101852 372.081268,219.980087 
 	C370.062134,220.978149 369.914581,222.625214 369.430420,223.952271 
@@ -281,7 +199,7 @@ M152.138763,86.541092
 	C141.818741,71.678940 141.572540,73.086563 142.408081,75.290054 
 	C144.181259,79.966232 147.278122,83.532242 152.138763,86.541092 
 z" data-index="0"></path>
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="#000000" opacity="1.000000" stroke="none" d="
 M307.756714,367.864929 
 	C315.877472,349.258545 320.499115,330.079224 323.566986,310.485962 
 	C324.022156,307.578857 324.066467,304.228912 327.945923,304.587646 
@@ -292,7 +210,7 @@ M307.756714,367.864929
 	C282.646332,426.892273 279.167633,428.143616 274.806854,427.059875 
 	C287.105408,407.843140 299.395630,389.132446 307.756714,367.864929 
 z" data-index="1"></path>
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="#000000" opacity="1.000000" stroke="none" d="
 M271.219727,368.223480 
 	C276.939484,361.264038 282.387482,354.538208 287.921722,347.884094 
 	C289.615601,345.847504 291.540039,343.307007 294.557587,344.820587 
@@ -302,7 +220,7 @@ M271.219727,368.223480
 	C224.114731,430.049591 217.782211,427.770630 211.285141,427.746124 
 	C231.374786,408.044312 252.449570,389.535065 271.219727,368.223480 
 z" data-index="2"></path>
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="#000000" opacity="1.000000" stroke="none" d="
 M332.671692,425.763733 
 	C327.752838,426.695923 326.143372,424.986359 326.884613,420.427246 
 	C329.337891,405.338379 329.972717,390.049744 331.701111,374.879791 
@@ -311,7 +229,7 @@ M332.671692,425.763733
 	C343.539856,389.604980 343.052277,405.203888 342.129517,420.817169 
 	C341.739563,427.414856 336.448151,424.696777 332.671692,425.763733 
 z" data-index="3"></path>
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="#000000" opacity="1.000000" stroke="none" d="
 M194.032379,410.203979 
 	C193.101959,415.479950 188.728333,417.447357 185.491364,420.426544 
 	C178.831360,426.556213 171.267426,429.821472 161.960831,429.013458 
@@ -321,7 +239,7 @@ M194.032379,410.203979
 	C156.575043,422.165527 170.451279,415.702209 184.667465,410.104126 
 	C187.563492,408.963715 190.772293,406.901459 194.032379,410.203979 
 z" data-index="4"></path>
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="#000000" opacity="1.000000" stroke="none" d="
 M256.283813,254.407196 
 	C249.784439,255.349625 244.187881,253.714493 239.345520,250.258804 
 	C236.413864,248.166626 234.467636,248.237274 231.505325,250.165512 
@@ -345,7 +263,7 @@ M256.283813,254.407196
 	C274.747375,236.594894 274.875977,239.631790 273.195251,242.772018 
 	C269.655060,249.386368 264.074432,253.180969 256.283813,254.407196 
 z" data-index="5"></path>
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="#000000" opacity="1.000000" stroke="none" d="
 M171.620697,152.852814 
 	C183.887482,154.513229 191.773453,169.078659 183.039322,180.677582 
 	C178.171661,187.141815 169.925934,189.272110 162.427139,186.143265 
@@ -353,7 +271,7 @@ M171.620697,152.852814
 	C152.904099,160.343536 158.833221,154.068802 167.212173,152.872665 
 	C168.517868,152.686264 169.868286,152.813232 171.620697,152.852814 
 z" data-index="6"></path>
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="#000000" opacity="1.000000" stroke="none" d="
 M318.002747,173.409592 
 	C314.956696,182.386093 309.781097,186.941895 302.533722,187.347748 
 	C294.646576,187.789459 288.430817,184.366577 285.339325,177.879242 
@@ -363,5 +281,3 @@ M318.002747,173.409592
 	C318.307129,171.011459 318.165009,172.007965 318.002747,173.409592 
 z" data-index="7"></path>
 </svg>
-  );
-}

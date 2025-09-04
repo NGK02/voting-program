@@ -1,57 +1,5 @@
-import { WalletButton } from '../solana/solana-provider'
-import { VotingProgram } from './voting-program-ui'
-import { AppHero } from '../app-hero'
-import { useWalletUi } from '@wallet-ui/react'
-import clsx from 'clsx'
-
-export default function VotingProgramFeature() {
-    const { account } = useWalletUi()
-
-    if (!account) {
-        return (
-            <section className="container mx-auto max-w-7xl px-6 lg:px-10 py-16 lg:py-24">
-                {/* Switch to a 12-col grid at lg */}
-                <div className="grid grid-cols-1 lg:grid-cols-20 items-center gap-10">
-                    {/* Left: Mascot (narrower) */}
-                    <div className="lg:col-span-9 flex justify-center lg:justify-end">
-                        <FrontImage />
-                    </div>
-
-                    {/* Right: Headline + Copy + Button (wider) */}
-                    <div className="max-w-3xl lg:col-span-11 lg:block flex flex-col items-center">
-                        <h1 className="font-extrabold tracking-tight leading-[0.9] text-5xl sm:text-6xl md:text-7xl lg:text-7xl">
-                            <span className="block italic">THE FUTURE</span>
-                            <span className="block italic">OF ELECTIONS</span>
-                        </h1>
-
-                        <p className="md:max-w-124 sm:max-w-96 max-w-78 mt-6 text-lg sm:text-xl text-gray-700">
-                            VoxPup showcases fair and effective voting by combining the decentralised nature of blockchain with the effective but dead simple approval voting system.
-                        </p>
-
-                        <div className="mt-8">
-                            <WalletButton />
-                        </div>
-                    </div>
-                </div>
-            </section>
-        )
-    }
-
-    return (
-        <div>
-            <AppHero title="Voting Program" />
-            <VotingProgram />
-        </div>
-    )
-}
-
-type FrontImageProps = {
-    className?: string
-}
-
-export function FrontImage() {
-    return (<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" enableBackground="new 0 0 848 1024" fill="currentColor" viewBox="183.87 276.15 452.52 461.05" className='w-[340px] sm:w-[400px] md:w-[400px] lg:w-[400px]'>
-        <path fill="currentColor" opacity="1.000000" stroke="none" d="
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100" enable-background="new 0 0 848 1024" xml:space="preserve" fill="currentColor" viewBox="183.87 276.15 452.52 461.05">
+<path fill="currentColor" opacity="1.000000" stroke="none" d="
 M456.607727,612.807495 
 	C459.282745,599.838135 461.822662,587.279419 464.538574,574.758972 
 	C466.121155,567.463196 466.636749,567.151794 474.293030,567.081665 
@@ -395,7 +343,7 @@ M283.664368,352.970184
 	C286.705597,340.073700 279.323883,336.287903 272.654236,337.343872 
 	C271.812164,344.766052 274.960175,349.490753 283.664368,352.970184 
 z" data-index="0"></path>
-        <path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="currentColor" opacity="1.000000" stroke="none" d="
 M335.476562,460.801025 
 	C332.146637,458.916443 329.890411,456.565094 328.544067,453.355957 
 	C327.534180,450.948822 327.551117,448.751465 329.873047,447.142609 
@@ -417,14 +365,14 @@ M335.476562,460.801025
 	C358.575745,458.599915 356.189301,458.353882 352.905701,460.466827 
 	C347.468689,463.965515 341.608276,464.104004 335.476562,460.801025 
 z" data-index="1"></path>
-        <path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="currentColor" opacity="1.000000" stroke="none" d="
 M301.495117,387.045593 
 	C310.655914,384.047211 317.740967,387.293671 320.161774,395.259277 
 	C322.242615,402.106293 318.093506,409.555450 311.007660,411.694244 
 	C304.842560,413.555084 298.556824,410.737152 295.606628,404.789856 
 	C292.383392,398.292206 294.373993,391.962158 301.495117,387.045593 
 z" data-index="2"></path>
-        <path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="currentColor" opacity="1.000000" stroke="none" d="
 M398.719543,388.544159 
 	C404.089600,384.903412 409.369446,384.666199 414.450775,387.953918 
 	C419.046661,390.927521 420.905609,395.522156 420.045319,400.904541 
@@ -432,7 +380,7 @@ M398.719543,388.544159
 	C405.233704,413.468994 399.093689,411.265991 395.988037,406.339844 
 	C392.173309,400.288940 392.942474,394.742065 398.719543,388.544159 
 z" data-index="3"></path>
-        <path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="currentColor" opacity="1.000000" stroke="none" d="
 M515.155212,537.121460 
 	C523.723694,534.282959 531.941711,531.639893 540.133728,528.918640 
 	C543.221863,527.892761 546.163574,527.335083 547.566711,531.205688 
@@ -441,7 +389,7 @@ M515.155212,537.121460
 	C516.924194,544.839172 514.837280,545.107117 513.588562,542.824890 
 	C512.388367,540.631470 512.414062,538.701416 515.155212,537.121460 
 z" data-index="4"></path>
-        <path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="currentColor" opacity="1.000000" stroke="none" d="
 M551.385071,544.347046 
 	C551.908386,547.341553 550.062012,548.323242 548.140930,548.948792 
 	C539.779480,551.671509 531.386230,554.297180 522.991211,556.915588 
@@ -450,7 +398,7 @@ M551.385071,544.347046
 	C528.872803,546.486084 537.404053,543.743103 545.960632,541.083801 
 	C548.568970,540.273132 550.541443,541.140442 551.385071,544.347046 
 z" data-index="5"></path>
-        <path fill="currentColor" opacity="1.000000" stroke="none" d="
+<path fill="currentColor" opacity="1.000000" stroke="none" d="
 M531.528931,567.578979 
 	C529.243408,568.260254 527.353943,568.945496 525.405212,569.331482 
 	C523.234680,569.761353 521.979919,568.514221 521.303406,566.553345 
@@ -460,5 +408,4 @@ M531.528931,567.578979
 	C555.826416,559.052917 554.645325,560.512878 552.440491,561.192505 
 	C545.600159,563.300842 538.747070,565.367859 531.528931,567.578979 
 z" data-index="6"></path>
-    </svg>)
-}
+</svg>
