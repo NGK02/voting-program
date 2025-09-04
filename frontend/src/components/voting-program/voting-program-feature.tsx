@@ -9,26 +9,26 @@ export default function VotingProgramFeature() {
 
     if (!account) {
         return (
-            <section className="container mx-auto max-w-7xl px-6 lg:px-10 py-16 lg:py-24">
+            <section className="container mx-auto max-w-7xl lg:px-10 py-16 lg:py-24">
                 {/* Switch to a 12-col grid at lg */}
-                <div className="grid grid-cols-1 lg:grid-cols-20 items-center gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-32 items-center gap-8">
                     {/* Left: Mascot (narrower) */}
-                    <div className="lg:col-span-9 flex justify-center lg:justify-end">
+                    <div className="lg:col-span-14 flex justify-center lg:justify-end">
                         <FrontImage />
                     </div>
 
                     {/* Right: Headline + Copy + Button (wider) */}
-                    <div className="max-w-3xl lg:col-span-11 lg:block flex flex-col items-center">
-                        <h1 className="font-extrabold tracking-tight leading-[0.9] text-5xl sm:text-6xl md:text-7xl lg:text-7xl">
+                    <div className="max-w-3xl lg:col-span-18 lg:block flex flex-col items-center">
+                        <h1 className="font-extrabold tracking-tight leading-[0.9] text-5xl sm:text-6xl md:text-6xl lg:text-7xl">
                             <span className="block italic">THE FUTURE</span>
-                            <span className="block italic">OF ELECTIONS</span>
+                            <span className="lg:ml-8 block italic">OF ELECTIONS</span>
                         </h1>
 
-                        <p className="md:max-w-124 sm:max-w-96 max-w-78 mt-6 text-lg sm:text-xl text-gray-700">
+                        <p className="lg:ml-16 md:max-w-120 sm:max-w-96 max-w-78 mt-8 text-lg sm:text-xl text-gray-700">
                             VoxPup showcases fair and effective voting by combining the decentralised nature of blockchain with the effective but dead simple approval voting system.
                         </p>
 
-                        <div className="mt-8">
+                        <div className="lg:ml-16 mt-12">
                             <WalletButton />
                         </div>
                     </div>
