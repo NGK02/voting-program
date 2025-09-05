@@ -78,6 +78,7 @@ export function CreateProposal() {
             submit={handleSubmit}
             triggerClassName="bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700"
             submitClassName="w-full bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+            contentClassName="sm:max-w-[525px] bg-neutral-50 dark:bg-neutral-900"
         >
             <div className="space-y-4">
                 <div>

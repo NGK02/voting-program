@@ -10,7 +10,8 @@ export function AppModal({
   submitDisabled,
   submitLabel,
   triggerClassName,
-  submitClassName
+  submitClassName,
+  contentClassName,
 }: {
   children: ReactNode
   title: string
@@ -19,13 +20,14 @@ export function AppModal({
   submitLabel?: string
   triggerClassName?: string
   submitClassName?: string
+  contentClassName?: string
 }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" size="default" className={triggerClassName}>{title}</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className={contentClassName}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

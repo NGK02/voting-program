@@ -73,7 +73,7 @@ export function ProposalList() {
                         return (
                             <div
                                 key={index}
-                                className="bg-white dark:bg-neutral-800 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700 hover:shadow-lg transition-shadow duration-200 flex flex-col h-148"
+                                className="bg-neutral-100/50 dark:bg-neutral-800 rounded-lg shadow-md border border-neutral-200 dark:border-neutral-700 hover:shadow-lg transition-shadow duration-200 flex flex-col h-148"
                             >
                                 {/* Proposal Header - Fixed height */}
                                 <div className="p-6 pb-4 flex-shrink-0 h-40">
