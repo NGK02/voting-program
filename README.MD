@@ -1,4 +1,4 @@
-<img alt="ollama" width="240" src="https://github.com/NK02/voting-program/assets/voxpup-icon-short-rounded">
+<img alt="voxpup" width="240" src="https://github.com/NGK02/voting-program/blob/master/assets/voxpup-icon-short-rounded.png">
 
 # VoxPup
 
