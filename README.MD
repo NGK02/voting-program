@@ -1,4 +1,6 @@
-<img alt="voxpup" width="240" src="https://github.com/NGK02/voting-program/blob/master/assets/voxpup-icon-short-rounded.png">
+<div align="center">
+    <img alt="voxpup" width="240" src="https://github.com/NGK02/voting-program/blob/master/assets/voxpup-icon-short-rounded.png">
+</div>
 
 # VoxPup
 
