@@ -1,5 +1,14 @@
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100%" viewBox="215.87 293.87 418.72 438.27" enableBackground="new 0 0 848 1024" fill="currentColor" className="w-14 h-auto text-neutral-900 dark:text-neutral-100">
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+import * as React from 'react';
+
+type Props = React.SVGProps<SVGSVGElement> & { className?: string };
+
+const Icon = React.forwardRef<SVGSVGElement, Props>(function Icon(
+    { className, ...props },
+    ref
+) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="215.87 293.87 418.72 438.27" fill="currentColor" className={className} ref={ref} {...props} aria-hidden="true">
+            <path fill="currentColor" opacity="1.000000" stroke="none" d="
   M287.136230,667.667786 
 	C288.071381,659.655457 293.457764,653.701782 294.586487,646.160034 
 	C299.427094,613.816406 309.063110,582.945007 323.634247,553.652222 
@@ -230,8 +239,8 @@ M334.975922,370.426331
 	C323.823944,383.136810 334.325806,389.958618 345.185272,387.087799 
 	C344.858185,379.977783 342.019958,374.386169 334.975922,370.426331 
 z" data-index="0">
-</path>
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+            </path>
+            <path fill="currentColor" opacity="1.000000" stroke="none" d="
 M433.410156,464.082947 
 	C439.499084,465.371552 445.436859,466.740143 446.920105,473.283997 
 	C448.384308,479.743713 444.029541,484.192993 439.818085,488.331024 
@@ -252,8 +261,8 @@ M433.410156,464.082947
 	C400.519775,474.953735 403.097717,467.785065 412.154877,465.118256 
 	C418.982117,463.108063 425.990265,463.575623 433.410156,464.082947 
 z" data-index="1">
-</path>
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+            </path>
+            <path fill="currentColor" opacity="1.000000" stroke="none" d="
 M348.960999,442.163086 
 	C351.610291,430.302002 359.718201,424.614075 369.338074,427.484741 
 	C376.644440,429.665009 381.773346,437.021240 380.936676,444.120300 
@@ -261,8 +270,8 @@ M348.960999,442.163086
 	C358.537415,459.340454 351.868225,454.627594 349.710205,446.970886 
 	C349.308075,445.544189 349.178986,444.040558 348.960999,442.163086 
 z" data-index="2">
-</path>
-<path fill="currentColor" opacity="1.000000" stroke="none" d="
+            </path>
+            <path fill="currentColor" opacity="1.000000" stroke="none" d="
 M498.133606,451.944153 
 	C491.792694,459.100037 483.824493,460.544098 476.500214,456.139282 
 	C470.409790,452.476593 467.760376,444.347870 470.365143,437.316223 
@@ -270,5 +279,9 @@ M498.133606,451.944153
 	C499.466980,431.300537 503.354767,440.737244 499.769623,449.007568 
 	C499.375336,449.917145 498.823425,450.758453 498.133606,451.944153 
 z" data-index="3">
-</path>
-</svg>
+            </path>
+        </svg>
+    );
+});
+
+export default Icon;
